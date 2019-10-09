@@ -1,0 +1,57 @@
+---
+
+- name:  Vmware delivery via Ansible playbooks
+  hosts: localhost
+  gather_facts: No
+  tasks:
+
+    - name: Parsing the CSV
+      read_csv:
+        path: test.csv
+        delimiter: ";"
+      register: vms
+      delegate_to: localhost
+
+
+    - name: Creating the vms
+      vmware_guest:
+        hostname: "{{ vm.Farm }}"
+        username: virtosadmin
+        password: Password10
+        validate_certs: no
+        #da inserire nel CSV ( ora manca )
+        datacenter: DCS2_ITA
+        cluster: "{{ vm.Cluster }}"
+        #datastore va sempre specificato
+        datastore: "{{ vm.DataStore }}"
+        #da gestire ancora rispetto al CSV
+        folder: "/DCS2_ITA/vm/DELIVERY_AUTOMATION/OPENSHIFT-DEV/TRAINING - OPENSHIFT-DEV/"
+        name: "{{ vm.VMName }}"
+        state: poweredon
+        template: "{{ vm.Source }}"
+        annotation: "{{ vm.NOTE }}"
+        hardware:
+          #la RAM nel CSV deve essere espressa in MB
+          memory_mb: "{{ vm.MemoryGB }}"
+          #la RAM riservata nel CSV deve essere espressa in MB
+          num_cpus: "{{ vm.NumCPU }}"
+          mem_reservation: "{{ vm.ResMemory }}"
+        networks:
+          - name: "{{ vm.Nic1_Vlan }}"
+            ip: "{{ vm.Nic1_IP }}"
+            netmask: "{{ vm.Nic1_MASK }}"
+            gateway: "{{ vm.Gateway }}"
+            wait_for_ip_address: yes
+      delegate_to: localhost
+      loop: "{{ vms.list }}"
+      loop_control:
+        loop_var: vm
+        
+        
+#    - debug:
+#        msg: "NIC1 vale {{ vm.Nic1_IP }}" 
+#      loop: "{{ vms.list }}"
+#      loop_control:
+#        loop_var: vm
+#      when:  
+#        - vm.Nic1_Vlan is defined
