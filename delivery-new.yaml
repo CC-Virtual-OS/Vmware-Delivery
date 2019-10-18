@@ -1,5 +1,7 @@
 ---
 
+# Tested on Vmware >= 6.5
+
 - name:  Vmware delivery via Ansible playbooks
   hosts: localhost
   gather_facts: No
@@ -20,6 +22,7 @@
       loop_control:
         loop_var: vm
       no_log: true
+
 
 
     - name: Authenticating against the Vcenter
@@ -47,6 +50,10 @@
 
 
     - debug:
+        var: prova
+
+    # CODICE PER UNO SOLO DATACENTER!!!
+    - debug:
         var: item
       loop: "{{ prova | json_query('json.value[*].datacenter')}}"
 
@@ -58,18 +65,22 @@
         return_content: yes
         headers:
           Cookie: "{{ ses.set_cookie }}"
-      register: dcbuono
+      register: listadc
       loop: "{{ prova | json_query('json.value[*].datacenter')}}"
 
 
-      #- set_fact:
-      #c: "{{ 'test1' if (a >= b) else 'test2' }}"
+    - debug:
+        var: listadc
 
-    - set_fact: 
-        alex: "{{ prova | json_query(json.value[item].name')}}"
-      when: "{{ prova | json_query(json.value[item].name')}} == {{ cluster }}"
-      loop: "{{ prova | json_query('json.value[*].datacenter')}}"
-           
+
+
+
+
+
+
+
+
+
 
 #    - uri:
 #        url: "https://{{ farm }}/rest/vcenter/cluster/{{ cluster }}"
