@@ -1,0 +1,58 @@
+---
+
+- name: Customization Playbook
+  hosts: localhost
+  vars:
+  #vars_files:
+    #- test.json
+    deploy: "{{ lookup('file', 'data.json') }}"  
+
+  gather_facts: false
+  tasks:
+
+#
+#
+# $..Network[?(@.Scope!='Management')]
+# $..Network[?(@.Scope=='Management')].IP
+#
+#
+
+     - debug:
+         var:  deploy[0] | json_query("Network[?(@.Scope=='Management')].IP") 
+         #loop:  "{{ deploy[0] | json_query('Network[?(@.Scope=='Management')].IP')}}"
+
+
+     - set_fact:
+         paolo: "{{ deploy[0] | json_query('Network[?(@.Scope==`Management`)].IP') }}"
+
+
+     - debug:
+         var: paolo
+
+#    - name: Parsing the CSV
+#      read_csv:
+#        path: test.csv
+#        delimiter: ";"
+#      register: vms
+#      delegate_to: localhost
+
+
+#    - set_fact:
+#        farm: "{{ vm.Farm }}"
+#        cluster: "{{ vm.Cluster }}"
+#        name: "{{ vm.VMName }}"
+#      loop: "{{ vms.list }}"
+#      loop_control:
+#        loop_var: vm
+#      no_log: true
+        
+
+#    - debug:
+#      vars:
+#        scope: ['vm.Nic2_Scope']
+#        svalue: 'Management'
+#        msg: posso collegarmi 
+#      when: svalue in scope
+#      loop: "{{ vms.list }}"
+#      loop_control:
+#        loop_var: vm
